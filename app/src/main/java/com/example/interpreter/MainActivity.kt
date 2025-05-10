@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun TopMenu() {
-        val items = listOf("Оператор присваивания", "Оператор сложения", "Оператор вычисения", "Оператор сравнения", "Блок 5", "Блок 6")
+        val items = listOf("+", "-", "/", "*", "=")
         val lazyListState = rememberLazyListState()
 
         LazyRow(
@@ -130,7 +130,7 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun BottomMenu() {
-        val items = listOf("Главная", "Старт", "Настройки")
+        val items = listOf("Main", "Run", "Settings")
         val icons = listOf(Icons.Default.Home, Icons.Default.Star, Icons.Default.Settings)
         var selectedItem by remember { mutableStateOf(0) }
 
