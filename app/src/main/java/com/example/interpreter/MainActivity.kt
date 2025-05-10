@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun TopMenu() {
-        val items = listOf("Operator +", "-", "/", "*", "=")
+        val items = listOf("Operator +", "Operator -", "/", "*", "=")
         val lazyListState = rememberLazyListState()
 
         LazyRow(
