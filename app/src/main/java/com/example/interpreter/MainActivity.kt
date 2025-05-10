@@ -50,6 +50,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.ui.text.style.TextAlign
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,7 +61,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun MainScreen() {
         Column(
@@ -74,10 +74,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun TopMenu() {
-        val items = listOf("Блок 1", "Блок 2", "Блок 3", "Блок 4", "Блок 5", "Блок 6")
+        val items = listOf("Оператор присваивания", "Оператор сложения", "Оператор вычисения", "Оператор сравнения", "Блок 5", "Блок 6")
         val lazyListState = rememberLazyListState()
 
         LazyRow(
@@ -86,6 +85,7 @@ class MainActivity : ComponentActivity() {
             modifier = Modifier
                 .background(Color(0xFF090f1f))
                 .fillMaxWidth()
+                .padding(top=45.dp)
                 .height(80.dp)
                 .padding(8.dp)
 
@@ -100,7 +100,12 @@ class MainActivity : ComponentActivity() {
                     contentAlignment = Alignment.Center,
 
                 ) {
-                    Text(text = items[index], color = Color.Black)
+                    Text(
+                        text = items[index],
+                        color = Color.Black,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }
@@ -125,7 +130,7 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun BottomMenu() {
-        val items = listOf("Главная", "Избранное", "Настройки")
+        val items = listOf("Главная", "Старт", "Настройки")
         val icons = listOf(Icons.Default.Home, Icons.Default.Star, Icons.Default.Settings)
         var selectedItem by remember { mutableStateOf(0) }
 
