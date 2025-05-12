@@ -1,14 +1,14 @@
 package com.example.interpreter_core
 
-class OperatorPlus (
+class OperatorMultiplication (
     private val aToken: String,
     private val bToken: String
-) : Action{
+) : Action {
     override fun execute(stack: MutableList<Int>, env: MutableMap<String, Int>) {
         val a = aToken.toIntOrNull() ?: env[aToken] ?: error("Unknown variable $aToken")
         val b = bToken.toIntOrNull() ?: env[bToken] ?: error("Unknown variable $bToken")
-        val sum = a+b;
+        val sum = a * b;
         stack.add(sum);
-        println("[plus] stack: $sum ($a+$b)")
+        println("[multiplication] stack: $sum ($a+$b)")
     }
 }

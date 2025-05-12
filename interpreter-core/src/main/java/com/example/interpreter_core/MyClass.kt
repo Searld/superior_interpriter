@@ -3,37 +3,55 @@ package com.example.interpreter_core
 fun main() {
     println("== Interpreter (beta) ==")
     println("  • assign <var> <value>")
-    println("  • plus   <a>    <b>")
-    println("Empty string → out.")
+    println("  • plus   <a> <b>")
+    println("  • mult   <a> <b>")
+    println("  • env → current env")
+    println("  • stack → current stack")
+    println("  • exit → out.")
 
-    val actions = mutableListOf<Action>()
+    val stack = mutableListOf<Int>()
+    val env = mutableMapOf<String, Int>()
+
     while (true) {
         print("> ")
         val line = readLine()?.trim().orEmpty()
-        if (line.isEmpty()) break
-
-        val parts = line.split("\\s+".toRegex())
-        when (parts[0].lowercase()) {
-            "assign" -> {
-                if (parts.size != 3) {
-                    println("Error. Format: assign <val> <value>")
-                    continue
-                }
-                actions += OperatorAssign(parts[1], parts[2])
-            }
-            "plus" -> {
-                if (parts.size != 3) {
-                    println("Error. Format: plus <a> <b>")
-                    continue
-                }
-                actions += OperatorPlus(parts[1], parts[2])
-            }
+        if (line.isEmpty()) continue
+        if (line.equals("exit", true)) break
+        when (val parts = line.split("\\s+".toRegex())) {
             else -> {
-                println("Wrong command: ${parts[0]}")
+                try {
+                    val cmd = parts[0].lowercase()
+                    val instr = when (cmd) {
+                        "assign" -> {
+                            require(parts.size >= 3)
+                            val name = parts[1]
+                            val expr = parts.subList(2, parts.size)
+                            OperatorAssign(name, expr)
+                        }
+                        "plus" -> {
+                            require(parts.size == 3)
+                            OperatorPlus(parts[1], parts[2])
+                        }
+                        "stack" -> {
+                            println("Current stack: $stack")
+                            continue
+                        }
+                        "mult" -> {
+                            require(parts.size == 3)
+                            OperatorMultiplication(parts[1], parts[2])
+                        }
+                        "env" -> {
+                            println("Current env: $env")
+                            continue
+                        }
+                        else -> error("Wrong command '$cmd'")
+                    }
+                    instr.execute(stack, env)
+                } catch (e: Exception) {
+                    println("Error: ${e.message}")
+                }
             }
         }
     }
-
-    val result = actions.joinToString(" ") { it.execute() }
-    println(">>> Result: $result")
+    println("aborting...")
 }
