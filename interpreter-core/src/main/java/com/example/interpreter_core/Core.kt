@@ -1,7 +1,7 @@
 package com.example.interpreter_core
 
 fun main() {
-    println("== Interpreter (beta) ==")
+    println("== Interpreter (console) ==")
     println("  • var <a,b,...>       — declare variables (=0)")
     println("  • assign <var> <expr> — assignment variables")
     println("  • plus   <a> <b>      — sum")
