@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "interpreter"
 include(":app")
+include(":interpreter-core")
