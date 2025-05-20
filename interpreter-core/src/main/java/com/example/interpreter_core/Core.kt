@@ -5,7 +5,7 @@ fun main() {
         "var a,b,c",
         "assign a 3+4",
         "assign b a*2",
-        "if b-100 > 10",
+        "if b > 10",
         "  assign c b+3",
         "  assign c c+3",
         "endif",
