@@ -1,7 +1,10 @@
 package com.example.interpreter_core
 
+
+data class RunResult(val env: Map<String, Int>, val stack: List<Int>)
+
 object BytecodeRunner {
-    fun run(program: List<Instruction>) {
+    fun run(program: List<Instruction>) : RunResult{
         val stack = java.util.Stack<Int>()
         val env = mutableMapOf<String, Int>()
         var ip = 0
@@ -45,7 +48,6 @@ object BytecodeRunner {
                 Instruction.End     -> break
             }
         }
-        println("Final env = $env")
-        println("Final stack = $stack")
+        return RunResult(env.toMap(), stack.toList())
     }
 }
