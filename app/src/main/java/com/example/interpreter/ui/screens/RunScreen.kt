@@ -33,14 +33,17 @@ import com.example.interpreter.components.WorkArea
 import com.example.interpreter.ui.components.TopMenu
 import com.example.interpreter.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
+import java.nio.file.WatchEvent
 
 @Composable
 fun RunScreen(viewModel: MainViewModel) {
     val imageOffsetX = remember { Animatable(-10f) }
     val alpha = remember { Animatable(0.1f) }
 
-
     LaunchedEffect(Unit) {
+        launch {
+            viewModel.executeSource(listOf<String>("var a", "assign a 1203"))
+        }
         launch {
             imageOffsetX.animateTo(
                 targetValue = -100f,
@@ -68,17 +71,12 @@ fun RunScreen(viewModel: MainViewModel) {
                 .fillMaxHeight()
                 .offset(imageOffsetX.value.dp,100.dp)
         )
-        while (true)
-        {
-            if(viewModel.textForPrint != "")
-            {
-                Text(
-                    text = viewModel.textForPrint,
-                    fontFamily = FontFamily(Font(R.font.lato, FontWeight.Bold)),
-                    fontSize = 18.sp,
-                    color = Color.White,
-                )
-            }
-        }
+            Text(
+                text = viewModel.output,
+                fontFamily = FontFamily(Font(R.font.lato, FontWeight.Bold)),
+                fontSize = 18.sp,
+                color = Color.White,
+                modifier = Modifier.padding(10.dp,15.dp)
+            )
     }
 }
