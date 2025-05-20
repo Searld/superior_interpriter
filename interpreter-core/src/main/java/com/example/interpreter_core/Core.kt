@@ -25,5 +25,7 @@ fun main() {
         println(a.toString())
 
     }
-    BytecodeRunner.run(program)
+    val out = BytecodeRunner.run(program)
+    println("Final env = ${out.env}")
+    println("Final stack = ${out.stack}")
 }
