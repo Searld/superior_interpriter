@@ -53,7 +53,6 @@ class MainViewModel : ViewModel() {
             _output.value += "==== Final Stack End====\n"
 
 
-
         } catch (e: Exception) {
             _output.value = "Ошибка: ${e.message}"
         }
@@ -82,14 +81,14 @@ class MainViewModel : ViewModel() {
         _selectedSlot.value = null
     }
 
-    fun addVariable(name: String) {
+    fun addVariable(name: String, command: String) {
         val variable = Variable(name,"0")
         _variables.add(variable)
-        _blocks.add(Block.VariableBlock(UUID.randomUUID().toString(), variable))
+        _blocks.add(0,Block.VariableBlock(UUID.randomUUID().toString(), variable, command))
     }
 
-    fun addAssignmentBlock() {
-        _blocks.add(Block.AssignmentBlock(UUID.randomUUID().toString()))
+    fun addAssignmentBlock( command: String) {
+        _blocks.add(Block.AssignmentBlock(UUID.randomUUID().toString(), command))
     }
 
     fun onItemSelected(item: String?) {

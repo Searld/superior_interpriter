@@ -84,12 +84,12 @@ fun WorkArea(blocks: List<Block>, viewModel: MainViewModel) {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally) {
             blocks.forEach { block ->
-                if(block is Block.VariableBlock) InitializeVarBlock(block.variable.name)
+                when(block) {
+                    is Block.VariableBlock -> InitializeVarBlock(block.variable.name)
+                    is Block.AssignmentBlock -> AssignmentBlock(block, viewModel)
+                }
             }
-            blocks.forEach { block ->
-                if(block is Block.AssignmentBlock) AssignmentBlock(block, viewModel)
-            }
-            PrintBlock()
+
         }
     }
 }

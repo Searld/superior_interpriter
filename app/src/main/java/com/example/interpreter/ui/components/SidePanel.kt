@@ -87,7 +87,7 @@ fun SidePanel(viewModel: MainViewModel
                 Text("Create variable", fontFamily = FontFamily(Font(R.font.lato, FontWeight.Bold)))
             }
             Button(
-                onClick = { viewModel.addAssignmentBlock()},
+                onClick = { viewModel.addAssignmentBlock("")},
                 modifier = Modifier.fillMaxWidth().padding(10.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(59, 160, 255),
@@ -146,7 +146,7 @@ fun SidePanel(viewModel: MainViewModel
             },
             confirmButton = {
                 Button(onClick = {
-                    viewModel.addVariable(variableName)
+                    viewModel.addVariable(variableName, "var $variableName")
                     showDialog = false
                 }) {
                     Text("Create")

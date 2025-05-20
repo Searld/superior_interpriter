@@ -30,6 +30,9 @@ import com.example.interpreter.R
 import com.example.interpreter.components.BottomMenu
 import com.example.interpreter.components.SidePanel
 import com.example.interpreter.components.WorkArea
+import com.example.interpreter.model.Block
+import com.example.interpreter.model.Value
+import com.example.interpreter.model.Variable
 import com.example.interpreter.ui.components.TopMenu
 import com.example.interpreter.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
@@ -38,11 +41,28 @@ import java.nio.file.WatchEvent
 @Composable
 fun RunScreen(viewModel: MainViewModel) {
     val imageOffsetX = remember { Animatable(-10f) }
-    val alpha = remember { Animatable(0.1f) }
+    val alpha = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
         launch {
-            viewModel.executeSource(listOf<String>("var a", "assign a 1203"))
+            val listOfCommands = viewModel.blocks.mapNotNull { block ->
+                when (block) {
+                    is Block.VariableBlock -> block.command
+                    is Block.AssignmentBlock -> {
+                        if (block.left != null && block.left is Variable && block.right != null) {
+                            "assign " + (block.left as Variable).name + " " +
+                                    when (block.right) {
+                                        is Variable -> (block.right as Variable).name
+                                        is Value ->(block.right as Value).value.toString()
+                                        else -> ""
+                                    }
+                        } else {
+                            null
+                        }
+                    }
+                }
+            }
+            viewModel.executeSource(listOfCommands)
         }
         launch {
             imageOffsetX.animateTo(
@@ -55,7 +75,7 @@ fun RunScreen(viewModel: MainViewModel) {
         }
         launch {
             alpha.animateTo(
-                targetValue = 0.25f,
+                targetValue = 0.08f,
                 animationSpec = tween(
                     durationMillis = 600,
                     easing = LinearOutSlowInEasing

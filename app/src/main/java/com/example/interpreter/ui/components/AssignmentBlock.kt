@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,7 +34,8 @@ fun AssignmentBlock(
     val selectedSlot = viewModel.selectedSlot
     val isLeftSelected = selectedSlot?.blockId == block.id && selectedSlot.slot == "left"
     val isRightSelected = selectedSlot?.blockId == block.id && selectedSlot.slot == "right"
-
+    val value = remember{mutableStateOf("")}
+    block.right = Value(value.value)
     Box(
         modifier = Modifier
             .fillMaxWidth(0.9f)
@@ -71,30 +73,7 @@ fun AssignmentBlock(
 
             Text("=", color = Color.White, fontSize = 25.sp)
 
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(30.dp)
-                    .padding(10.dp, 0.dp)
-                    .border(
-                        width = 1.dp,
-                        color = if (isRightSelected) Color.Red else Color.White,
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    .background(Color(70, 106, 140), shape = RoundedCornerShape(8.dp))
-                    .clickable {
-                        if (isRightSelected) viewModel.clearSelectedSlot()
-                        else viewModel.selectSlot(block.id, "right")
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                val text = when (val right = block.right) {
-                    is Variable -> right.name
-                    is Value -> right.value
-                    else -> "Value or var"
-                }
-                Text(text, color = Color.LightGray, fontSize = 11.sp)
-            }
+            TextField(value = value.value, onValueChange = {newText -> value.value = newText})
         }
     }
 }
