@@ -44,6 +44,8 @@ object BytecodeRunner {
                     stack.push(result)
                     ip++
                 }
+                is Instruction.Else    -> { ip++; continue }
+                is Instruction.EndElse -> { ip++; continue }
 
                 Instruction.End     -> break
             }

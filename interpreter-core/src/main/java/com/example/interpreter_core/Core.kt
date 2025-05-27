@@ -1,7 +1,7 @@
 package com.example.interpreter_core
 
 fun main() {
-    val source = listOf(
+    val source1 = listOf(
         "var a,b,c",
         "assign a 3+4",
         "assign b a*2",
@@ -9,15 +9,19 @@ fun main() {
         "  assign c b+3",
         "  assign c c+3",
         "endif",
-        "assign f 99999",
+        "assign f 2*(2+2)",
         "assign b 99999",
         "exit"
     )
-    val source1 = listOf(
+    val source = listOf(
         "var a,b,c",
         "assign a 3+4",
         "assign b a*2",
-        "assign c b * a",
+        "if a > 3000000",
+        "   assign a 999",
+        "else",
+        "assign b 23",
+        "endelse"
     )
     val program = BytecodeGenerator.parse(source)
     println("request \n" + source)

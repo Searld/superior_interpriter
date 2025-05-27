@@ -13,5 +13,7 @@ sealed class Instruction {
     data class Goto(val targetIp: Int) : Instruction()
     data object End : Instruction()
     data class Cmp(val op: String) : Instruction()
+    object Else : Instruction()
+    object EndElse : Instruction()
 
 }
