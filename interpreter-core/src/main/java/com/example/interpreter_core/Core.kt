@@ -17,11 +17,10 @@ fun main() {
         "var a,b,c",
         "assign a 3+4",
         "assign b a*2",
-        "if a > 3000000",
-        "   assign a 999",
-        "else",
+        "while a > 2",
+        "   assign a a - 2",
+        "endwhile",
         "assign b 23",
-        "endelse"
     )
     val program = BytecodeGenerator.parse(source)
     println("request \n" + source)

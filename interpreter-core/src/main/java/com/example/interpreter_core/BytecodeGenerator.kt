@@ -6,6 +6,8 @@ object BytecodeGenerator {
 
         val ifStack = mutableListOf<Int>()
         val ifFalseStack = mutableListOf<Int>()
+        val whileStartStack = mutableListOf<Int>()
+        val whileExitStack = mutableListOf<Int>()
         val gotoStack    = mutableListOf<Int>()
 
         for (raw in lines) {
@@ -72,6 +74,31 @@ object BytecodeGenerator {
                     val gotoPos=gotoStack.removeLast()
                     program[gotoPos]=Instruction.Goto(program.size)
                 }
+                "while" -> {
+                    whileStartStack += program.size
+
+                    val hdr = arg.split(" ", limit = 3)
+                    val lhs = Utils.tokenize(hdr[0])
+                    val cmp = hdr[1]
+                    val rhs = Utils.tokenize(hdr[2])
+
+                    val env = program.filterIsInstance<Instruction.Var>().associate { it.name to 0 }
+                    Utils.toRPN(lhs, env).forEach { emitToken(it, program) }
+                    Utils.toRPN(rhs, env).forEach { emitToken(it, program) }
+
+                    program += Instruction.Cmp(cmp)
+                    program += Instruction.IfFalse(-1)
+                    whileExitStack += program.lastIndex
+                }
+                "endwhile" -> {
+                    val loopStart = whileStartStack.removeLast()
+                    program += Instruction.Goto(loopStart)
+
+                    val exitPos = whileExitStack.removeLast()
+                    program[exitPos] = Instruction.IfFalse(program.size)
+                }
+
+
                 "exit" -> program += Instruction.End
                 else -> error("Unknown cmd ${parts[0]}")
             }
