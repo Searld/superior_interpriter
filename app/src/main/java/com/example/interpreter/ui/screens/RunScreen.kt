@@ -15,10 +15,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
@@ -27,13 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.interpreter.R
-import com.example.interpreter.components.BottomMenu
-import com.example.interpreter.components.SidePanel
-import com.example.interpreter.components.WorkArea
 import com.example.interpreter.model.Block
-import com.example.interpreter.model.Value
-import com.example.interpreter.model.Variable
-import com.example.interpreter.ui.components.TopMenu
 import com.example.interpreter.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
 import java.nio.file.WatchEvent
@@ -42,27 +39,19 @@ import java.nio.file.WatchEvent
 fun RunScreen(viewModel: MainViewModel) {
     val imageOffsetX = remember { Animatable(-10f) }
     val alpha = remember { Animatable(0f) }
+    var text = remember { mutableStateOf<String>("") }
 
     LaunchedEffect(Unit) {
         launch {
             val listOfCommands = viewModel.blocks.mapNotNull { block ->
-                when (block) {
-                    is Block.VariableBlock -> block.command
-                    is Block.AssignmentBlock -> {
-                        if (block.left != null && block.left is Variable && block.right != null) {
-                            "assign " + (block.left as Variable).name + " " +
-                                    when (block.right) {
-                                        is Variable -> (block.right as Variable).name
-                                        is Value ->(block.right as Value).value.toString()
-                                        else -> ""
-                                    }
-                        } else {
-                            null
-                        }
-                    }
-                }
+                block.command()
             }
             viewModel.executeSource(listOfCommands)
+            viewModel.blocks.forEach { block->
+                if(block is Block.PrintBlock)
+                    text.value +=
+                        "${block.variable?.name} = ${viewModel.output?.env[block.variable?.name].toString()}\n"
+            }
         }
         launch {
             imageOffsetX.animateTo(
@@ -83,7 +72,12 @@ fun RunScreen(viewModel: MainViewModel) {
             )
         }
     }
-    Box(modifier = Modifier.fillMaxSize().background(Color(5, 5, 5))) {
+    Box(modifier = Modifier.fillMaxSize()
+        .background(brush = Brush.radialGradient(
+            colors = listOf(Color(15, 24, 36),Color(5, 5, 5)),
+            center = Offset(500f, 1000f),
+            radius = 700f
+        ))) {
         Image(
             painter = painterResource(id = R.drawable.anime_run),
             contentDescription = "Background Image",
@@ -91,12 +85,13 @@ fun RunScreen(viewModel: MainViewModel) {
                 .fillMaxHeight()
                 .offset(imageOffsetX.value.dp,100.dp)
         )
+
             Text(
-                text = viewModel.output,
+                text = text.value,
                 fontFamily = FontFamily(Font(R.font.lato, FontWeight.Bold)),
                 fontSize = 18.sp,
                 color = Color.White,
-                modifier = Modifier.padding(10.dp,15.dp)
+                modifier = Modifier.padding(10.dp,30.dp)
             )
     }
 }

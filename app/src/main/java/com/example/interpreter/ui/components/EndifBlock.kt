@@ -3,6 +3,7 @@ package com.example.interpreter.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,9 +20,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.interpreter.R
+import com.example.interpreter.model.Block
 
 @Composable
-fun InitializeVarBlock(varName: String) {
+fun EndifBlock() {
     Box(
         modifier = Modifier
             .fillMaxWidth(0.9f)
@@ -38,13 +40,9 @@ fun InitializeVarBlock(varName: String) {
         contentAlignment = Alignment.Center
     ) {
         Row(modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically) {
-            Text("var:",
-                color = Color.White,
-                fontSize = 25.sp,
-                modifier = Modifier.padding(20.dp,0.dp,30.dp,0.dp),
-                fontFamily = FontFamily(Font(R.font.lato)))
-            Text("$varName",
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center) {
+            Text("Endif",
                 color = Color.White,
                 fontSize = 23.sp,
                 fontFamily = FontFamily(Font(R.font.lato)))

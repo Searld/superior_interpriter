@@ -20,6 +20,7 @@ import androidx.compose.ui.zIndex
 import com.example.interpreter.R
 import kotlinx.coroutines.launch
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -28,8 +29,7 @@ import com.example.interpreter.model.Variable
 import com.example.interpreter.viewmodel.MainViewModel
 
 @Composable
-fun SidePanel(viewModel: MainViewModel
-) {
+fun SidePanelFunctions(viewModel: MainViewModel) {
     val panelWidthDp = 300.dp
     val density = LocalDensity.current
     val panelWidthPx = with(density) { panelWidthDp.toPx() }
@@ -39,7 +39,7 @@ fun SidePanel(viewModel: MainViewModel
 
     var showDialog by remember { mutableStateOf(false) }
     LaunchedEffect(viewModel.selectedItem.value) {
-        if (viewModel.selectedItem.value != null) {
+        if (viewModel.selectedItem.value == "Functions") {
             launch {
                 slideAnim.animateTo(0f, animationSpec = tween(350, easing = FastOutSlowInEasing))
             }
@@ -77,86 +77,43 @@ fun SidePanel(viewModel: MainViewModel
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Button(
-                onClick = { showDialog = true },
-                modifier = Modifier.fillMaxWidth().padding(10.dp, 25.dp, 10.dp, 0.dp),
+                onClick =
+                    {
+                        viewModel.addPrintBlock()
+                    },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp, 25.dp, 10.dp, 0.dp)
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(
+                                Color(59, 160, 255),
+                                Color(121, 59, 255)
+                            )
+                        ),
+                        shape = RoundedCornerShape(40.dp)
+                    ),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(59, 160, 255),
+                    containerColor = Color.Transparent,
                     contentColor = Color.White
-                )
+                ),
+                shape = RoundedCornerShape(40.dp),
+                contentPadding = PaddingValues()
             ) {
-                Text("Create variable", fontFamily = FontFamily(Font(R.font.lato, FontWeight.Bold)))
-            }
-            Button(
-                onClick = { viewModel.addAssignmentBlock("")},
-                modifier = Modifier.fillMaxWidth().padding(10.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(59, 160, 255),
-                    contentColor = Color.White
-                )
-            ) {
-                Text("Assign var", fontFamily = FontFamily(Font(R.font.lato, FontWeight.Bold)))
-            }
-            Text(
-                "Variables:",
-                fontFamily = FontFamily(Font(R.font.lato, FontWeight.Bold)),
-                fontSize = 26.sp,
-                color = Color.LightGray,
-                modifier = Modifier.padding(10.dp, 20.dp, 10.dp, 0.dp)
-            )
-
-            viewModel.variables.forEach { variable ->
-                val varName = variable.name
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(60.dp)
-                        .padding(10.dp,20.dp,10.dp,0.dp)
-                        .border(width = 1.dp, color = Color.White, shape = RoundedCornerShape(8.dp))
-                        .background(Color.Transparent)
-                        .clickable { viewModel.insertIntoSelectedSlot(variable)
-                                     viewModel.onItemSelected(null)},
+                        .padding(vertical = 12.dp),
                     contentAlignment = Alignment.Center
-                )
-                {
+                ) {
                     Text(
-                        "$varName",
-                        color = Color.White,
-                        fontSize = 11.sp
+                        "Print",
+                        fontFamily = FontFamily(Font(R.font.lato, FontWeight.Bold))
                     )
                 }
             }
+
 
         }
-    }
-    if (showDialog) {
-        var variableName by remember { mutableStateOf("") }
-
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text("New Variable") },
-            text = {
-                Column {
-                    Text("Enter variable name:")
-                    TextField(
-                        value = variableName,
-                        onValueChange = { variableName = it },
-                        singleLine = true
-                    )
-                }
-            },
-            confirmButton = {
-                Button(onClick = {
-                    viewModel.addVariable(variableName, "var $variableName")
-                    showDialog = false
-                }) {
-                    Text("Create")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { showDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
     }
 }

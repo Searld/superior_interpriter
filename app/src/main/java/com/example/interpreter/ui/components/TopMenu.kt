@@ -33,7 +33,7 @@ fun TopMenu(
         state = lazyListState,
         flingBehavior = rememberSnapFlingBehavior(lazyListState),
         modifier = Modifier
-            .background(Color(5, 5, 5))
+            .background(Color.Transparent)
             .fillMaxWidth()
             .padding(top = 45.dp)
             .height(80.dp)
@@ -44,7 +44,7 @@ fun TopMenu(
                 modifier = Modifier
                     .padding(4.dp)
                     .size(120.dp, 60.dp)
-                    .background(Color.White, RoundedCornerShape(8.dp))
+                    .background(Color(41, 41, 41).copy(alpha = 0.09f), RoundedCornerShape(8.dp))
                     .clickable {
                         onItemSelected(items[index])
                     }
@@ -53,7 +53,7 @@ fun TopMenu(
             ) {
                 Text(
                     text = items[index],
-                    color = Color.Black,
+                    color = Color.White,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                     fontFamily = FontFamily(Font(R.font.lato, FontWeight.Bold))

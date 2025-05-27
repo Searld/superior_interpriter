@@ -17,6 +17,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -48,7 +50,12 @@ fun SettingsScreen() {
             )
         }
     }
-    Box(modifier = Modifier.fillMaxSize().background(Color(5, 5, 5))) {
+    Box(modifier = Modifier.fillMaxSize()
+        .background(brush = Brush.radialGradient(
+            colors = listOf(Color(15, 24, 36),Color(5, 5, 5)),
+            center = Offset(500f, 1000f),
+            radius = 700f
+        ))) {
         Image(
             painter = painterResource(id = R.drawable.anime_settings),
             contentDescription = "Background Image",

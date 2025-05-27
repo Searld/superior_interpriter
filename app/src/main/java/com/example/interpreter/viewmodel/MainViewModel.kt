@@ -12,6 +12,7 @@ import com.example.interpreter.model.Value
 import com.example.interpreter.model.Variable
 import com.example.interpreter_core.BytecodeGenerator
 import com.example.interpreter_core.BytecodeRunner
+import com.example.interpreter_core.RunResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -34,27 +35,16 @@ class MainViewModel : ViewModel() {
         _selectedSlot.value = SelectedSlot(blockId, slot)
     }
 
-    private val _output = mutableStateOf<String>("")
-    val output: String get() = _output.value
+    private val _output = mutableStateOf<RunResult?>(null)
+    val output: RunResult? get() = _output.value
 
     fun executeSource(lines: List<String>) = viewModelScope.launch {
         try {
             val program = BytecodeGenerator.parse(lines)
-            val result = BytecodeRunner.run(program)
-
-            _output.value = "==== Bytecode Instructions ====\n"
-            program.forEachIndexed { idx, instr -> _output.value += "$idx: $instr\n" }
-            _output.value += "==== Bytecode Instructions End====\n\n"
-            _output.value += "==== Final Environment ====\n"
-            result.env.forEach { (name, value) -> _output.value += "$name = $value\n" }
-            _output.value += "==== Final Environment End====\n\n"
-            _output.value += "==== Final Stack ====\n"
-            result.stack.forEachIndexed { idx, v -> _output.value += "[$idx] = $v" }
-            _output.value += "==== Final Stack End====\n"
-
+            _output.value = BytecodeRunner.run(program)
 
         } catch (e: Exception) {
-            _output.value = "Ошибка: ${e.message}"
+            _output.value = null
         }
     }
 
@@ -70,6 +60,12 @@ class MainViewModel : ViewModel() {
                 "right" -> oldBlock.copy(right = value)
                 else -> oldBlock
             }
+            is Block.ConditionBlock -> when(slot.slot){
+                "left" -> oldBlock.copy(leftExpr = value)
+                "right" -> oldBlock.copy(rightExpr = value)
+                else -> oldBlock
+            }
+            is Block.PrintBlock -> oldBlock.copy(variable = value as Variable)
             else -> oldBlock
         }
 
@@ -81,14 +77,26 @@ class MainViewModel : ViewModel() {
         _selectedSlot.value = null
     }
 
-    fun addVariable(name: String, command: String) {
+    fun addVariable(name: String) {
         val variable = Variable(name,"0")
         _variables.add(variable)
-        _blocks.add(0,Block.VariableBlock(UUID.randomUUID().toString(), variable, command))
+        _blocks.add(0,Block.VariableBlock(UUID.randomUUID().toString(), variable))
     }
 
-    fun addAssignmentBlock( command: String) {
-        _blocks.add(Block.AssignmentBlock(UUID.randomUUID().toString(), command))
+    fun addAssignmentBlock() {
+        _blocks.add(Block.AssignmentBlock(UUID.randomUUID().toString()))
+    }
+
+    fun addConditionBlock() {
+        _blocks.add(Block.ConditionBlock(UUID.randomUUID().toString()))
+    }
+
+    fun addPrintBlock() {
+        _blocks.add(Block.PrintBlock(UUID.randomUUID().toString()))
+    }
+
+    fun addEndifBlock() {
+        _blocks.add(Block.EndifBlock(UUID.randomUUID().toString()))
     }
 
     fun onItemSelected(item: String?) {

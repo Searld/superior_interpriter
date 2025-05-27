@@ -1,5 +1,6 @@
 package com.example.interpreter.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,17 +21,29 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.interpreter.R
+import com.example.interpreter.model.Block
 import com.example.interpreter.model.Value
 import com.example.interpreter.model.Variable
+import com.example.interpreter.viewmodel.MainViewModel
 
 @Composable
-fun PrintBlock() {
+fun PrintBlock(viewModel: MainViewModel,
+               block: Block.PrintBlock) {
+    val selectedSlot = viewModel.selectedSlot
+    val isSelected = selectedSlot?.blockId == block.id
     Box(
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .padding(8.dp)
             .size(100.dp, 50.dp)
-            .background(Color(59, 160, 255), RoundedCornerShape(8.dp)),
+            .border(
+                BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
+                shape = RoundedCornerShape(8.dp)
+            )
+            .background(
+                color = Color(59, 160, 255).copy(alpha = 0.07f),
+                shape = RoundedCornerShape(8.dp)
+            ),
         contentAlignment = Alignment.Center
     ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -42,18 +55,23 @@ fun PrintBlock() {
                 modifier = Modifier
                     .weight(1f)
                     .height(30.dp)
-                    .padding(40.dp, 0.dp)
+                    .padding(10.dp, 0.dp)
                     .border(
                         width = 1.dp,
-                        color = Color.White,
+                        color = if(isSelected) Color.Red.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.1f),
                         shape = RoundedCornerShape(8.dp)
                     )
-                    .background(Color(70, 106, 140), shape = RoundedCornerShape(8.dp)),
+                    .background(Color(70, 106, 140).copy(alpha = 0.09f), shape = RoundedCornerShape(8.dp))
+                    .clickable {
+                        if(!isSelected)
+                            viewModel.selectSlot(block.id,"")
+                        else
+                            viewModel.clearSelectedSlot()
+                    },
                 contentAlignment = Alignment.Center
             ) {
-                Text("Var", color = Color.LightGray, fontSize = 14.sp,
-                    fontFamily = FontFamily(Font(R.font.lato)))
-
+                val txt = if(block.variable!=null) block.variable?.name else "Var or arr"
+                Text(text = txt.toString(), color = Color.LightGray, fontSize = 11.sp)
             }
         }
     }
