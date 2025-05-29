@@ -21,25 +21,28 @@ object BytecodeGenerator {
                         ?.forEach { program += Instruction.Var(it) }
                 }
                 "assign" -> {
-                    val assignParts = parts.getOrNull(1)
-                        ?.split(" ", limit = 2)
-                        ?: error("Bad assign syntax")
-                    val name = assignParts[0]
-                    val expr = assignParts[1]
-                    val tokens = Utils.tokenize(expr)
+                    val (target, expr) = arg.split(" ", limit = 2)
                     val env = program.filterIsInstance<Instruction.Var>().associate { it.name to 0 }
-                    val rpn = Utils.toRPN(tokens, env)
-                    for (tok in rpn) {
-                        when (tok) {
-                            "+" -> program += Instruction.Add
-                            "-" -> program += Instruction.Sub
-                            "*" -> program += Instruction.Mul
-                            "/" -> program += Instruction.Div
-                            "%" -> program += Instruction.Mod
-                            else -> program += Instruction.Push(tok)
-                        }
+
+                    val arrayMatch = Regex("""^(\w+)\[(.+)]$""").find(target)
+                    if (arrayMatch != null) {
+                        val (name, idxExpr) = arrayMatch.destructured
+
+                        val idxTokens = Utils.tokenize(idxExpr)
+                        val idxRpn = Utils.toRPN(idxTokens, env)
+                        idxRpn.forEach { emitToken(it, program) }
+
+                        val valueTokens = Utils.tokenize(expr)
+                        val valueRpn = Utils.toRPN(valueTokens, env)
+                        valueRpn.forEach { emitToken(it, program) }
+
+
+                        program += Instruction.ArrayStore(name)
+                    } else {
+                        val rpn = Utils.toRPN(Utils.tokenize(expr), env)
+                        rpn.forEach { emitToken(it, program) }
+                        program += Instruction.Pop(target)
                     }
-                    program += Instruction.Pop(name)
                 }
                 "if" -> {
                     val hdr = arg.split(" ", limit = 3)
@@ -97,6 +100,11 @@ object BytecodeGenerator {
                     val exitPos = whileExitStack.removeLast()
                     program[exitPos] = Instruction.IfFalse(program.size)
                 }
+                "array" -> {
+                    val (name, sizeStr) = arg.split(" ")
+                    val size = sizeStr.toIntOrNull() ?: error("Wrong array size")
+                    program += Instruction.ArrayDecl(name, size)
+                }
 
 
                 "exit" -> program += Instruction.End
@@ -111,14 +119,25 @@ object BytecodeGenerator {
             prog += Instruction.Push(it.toString())
             return
         }
+        Regex("""^(\w+)\[(.+)]$""").find(tok)?.let { m ->
+            val (name, idxExpr) = m.destructured
+            val env = prog.filterIsInstance<Instruction.Var>().associate { it.name to 0 }
+
+            val idxRpn = Utils.toRPN(Utils.tokenize(idxExpr), env)
+            idxRpn.forEach { emitToken(it, prog) }
+            prog += Instruction.ArrayLoad(name)
+            return
+        }
         when (tok) {
-            "+","-","*","/","%" -> prog += when(tok){
-                "+"->Instruction.Add; "-"->Instruction.Sub
-                "*"->Instruction.Mul; "/"->Instruction.Div; "%"->Instruction.Mod
-                else->error("")
-            }
+            "+" -> prog += Instruction.Add
+            "-" -> prog += Instruction.Sub
+            "*" -> prog += Instruction.Mul
+            "/" -> prog += Instruction.Div
+            "%" -> prog += Instruction.Mod
             else -> prog += Instruction.Push(tok)
         }
     }
+
+
 
 }
