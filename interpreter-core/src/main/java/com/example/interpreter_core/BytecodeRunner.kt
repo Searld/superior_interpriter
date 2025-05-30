@@ -1,11 +1,12 @@
 package com.example.interpreter_core
 
 
-data class RunResult(val env: Map<String, Int>, val stack: List<Int>)
+data class RunResult(val env: Map<String, Int>, val stack: List<Int>,val arrays: Map<String, List<Int>>)
 
 object BytecodeRunner {
     fun run(program: List<Instruction>) : RunResult{
         val stack = java.util.Stack<Int>()
+        val arrays = mutableMapOf<String, IntArray>()
         val env = mutableMapOf<String, Int>()
         var ip = 0
 
@@ -44,10 +45,35 @@ object BytecodeRunner {
                     stack.push(result)
                     ip++
                 }
+                is Instruction.Else    -> { ip++; continue }
+                is Instruction.EndElse -> { ip++; continue }
+                is Instruction.ArrayDecl -> {
+                    arrays[instr.name] = IntArray(instr.size) { 0 }
+                    ip++
+                }
+                is Instruction.ArrayLoad -> {
+                    val idx = stack.pop()
+                    val arr = arrays[instr.name] ?: error("No such array ${instr.name}")
+                    if (idx !in arr.indices){
+                        error("Index out of range: ${instr.name}[$idx], size=${arr.size}")
+                    }
+                    stack.push(arr[idx])
+                    ip++
+                }
+                is Instruction.ArrayStore -> {
+                    val value = stack.pop()
+                    val idx   = stack.pop()
+                    val arr = arrays[instr.name] ?: error("No such array ${instr.name}")
+                    if (idx !in arr.indices){
+                        error("Index out of range: ${instr.name}[$idx], size=${arr.size}")
+                    }
+                    arr[idx] = value
+                    ip++
+                }
 
                 Instruction.End     -> break
             }
         }
-        return RunResult(env.toMap(), stack.toList())
+        return RunResult(env.toMap(), stack.toList(), arrays.mapValues { it.value.toList() })
     }
 }

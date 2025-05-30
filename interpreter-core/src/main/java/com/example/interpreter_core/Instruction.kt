@@ -13,5 +13,10 @@ sealed class Instruction {
     data class Goto(val targetIp: Int) : Instruction()
     data object End : Instruction()
     data class Cmp(val op: String) : Instruction()
+    object Else : Instruction()
+    object EndElse : Instruction()
+    data class ArrayDecl(val name: String, val size: Int) : Instruction()
+    data class ArrayLoad(val name: String) : Instruction()
+    data class ArrayStore(val name: String) : Instruction()
 
 }
