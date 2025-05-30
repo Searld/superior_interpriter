@@ -114,7 +114,7 @@ fun SidePanelConditions(viewModel: MainViewModel) {
             }
 
             Button(
-                onClick = { viewModel.addAssignmentBlock()},
+                onClick = { viewModel.addElseBlock()},
                 modifier = Modifier.fillMaxWidth()
                     .padding(10.dp, 15.dp, 10.dp, 0.dp)
                     .background(

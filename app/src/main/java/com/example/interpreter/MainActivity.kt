@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
                                 RunScreen(viewModel)
                             }
                             composable(Screen.Settings.route) {
-                                SettingsScreen()
+                                SettingsScreen(viewModel)
                             }
                         }
                     }

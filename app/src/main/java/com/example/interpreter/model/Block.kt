@@ -1,7 +1,9 @@
 package com.example.interpreter.model
 
 import Utils.Exceptions
+import kotlinx.serialization.Serializable
 
+@Serializable
 sealed class Block(open val id: String) {
     abstract fun command(): String
 
@@ -29,6 +31,22 @@ sealed class Block(open val id: String) {
         }
     }
 
+    data class ElseBlock(
+        override val id: String
+    ) : Block(id) {
+        override fun command(): String {
+            return "endelse"
+        }
+    }
+
+    data class EndWhile(
+        override val id: String
+    ) : Block(id) {
+        override fun command(): String {
+            return "endwhile"
+        }
+    }
+
     data class AssignmentBlock(
         override val id: String,
         var left: IPlacable? = null,
@@ -46,6 +64,7 @@ sealed class Block(open val id: String) {
             }
         }
     }
+
     data class ConditionBlock(
         override val id: String,
         var leftExpr: IPlacable? = null,
@@ -63,7 +82,6 @@ sealed class Block(open val id: String) {
                 Exceptions.handleException("One of expression was null")
                 return ""
             }
-
         }
     }
 
@@ -84,7 +102,6 @@ sealed class Block(open val id: String) {
                 Exceptions.handleException("One of expression was null")
                 return ""
             }
-
         }
     }
 
@@ -96,6 +113,7 @@ sealed class Block(open val id: String) {
             return ""
         }
     }
+
     data class CreatingArrayBlock(
         override val id: String,
         var name: String,
@@ -105,14 +123,15 @@ sealed class Block(open val id: String) {
             return "array $name $size"
         }
     }
+
     data class AssignArrBlock(
         override val id: String,
-        var arr: Array? = null,
+        var arrName: String? = null,
         var index: String = "0",
         var value: Value? = null
     ) : Block(id) {
         override fun command(): String {
-            return "assign ${arr?.name}[$index] $value"
+            return "assign $arrName[$index] $value"
         }
     }
 }

@@ -44,6 +44,15 @@ class MainViewModel : ViewModel() {
     private val _isIfClosed = mutableStateOf(false)
     val isIfClosed: Boolean get() = _isIfClosed.value
 
+    private val _isIfExist = mutableStateOf(false)
+    val isIfExist: Boolean get() = _isIfExist.value
+
+    private val _isElseClosed = mutableStateOf(false)
+    val isELseClosed: Boolean get() = _isElseClosed.value
+
+    private val _isWhileClosed = mutableStateOf(false)
+    val isWhileClosed: Boolean get() = _isWhileClosed.value
+
     private val _output = mutableStateOf<RunResult?>(null)
     val output: RunResult? get() = _output.value
 
@@ -75,7 +84,7 @@ class MainViewModel : ViewModel() {
                     else -> oldBlock
                 }
                 is Block.AssignArrBlock -> when(slot.slot){
-                    "left" -> oldBlock.copy(arr = value as Array)
+                    "left" -> oldBlock.copy(arrName = (value as Array).name)
                     "right" -> oldBlock.copy(value = value as Value)
                     else -> oldBlock
                 }
@@ -104,30 +113,33 @@ class MainViewModel : ViewModel() {
         _selectedSlot.value = null
     }
 
-    fun addVariable(name: String) {
-        val variable = Variable(name,"0")
+    fun addVariable(name: String, value: String? = null) {
+        val variable = Variable(name,value)
         _variables.add(variable)
         _blocks.add(0,Block.VariableBlock(UUID.randomUUID().toString(), variable))
     }
 
-    fun addAssignmentBlock() {
-        _blocks.add(Block.AssignmentBlock(UUID.randomUUID().toString()))
+    fun addAssignmentBlock(left: IPlacable? = null, right: IPlacable? = null) {
+        _blocks.add(Block.AssignmentBlock(UUID.randomUUID().toString(), left = left, right=right))
     }
 
-    fun addAssignArrayBlock() {
-        _blocks.add(Block.AssignArrBlock(UUID.randomUUID().toString()))
+    fun addAssignArrayBlock(arrName: String? = null, index: String = "0", value: Value? = null) {
+        _blocks.add(Block.AssignArrBlock(UUID.randomUUID().toString(), arrName= arrName,
+            index = index, value=value))
     }
 
-    fun addConditionBlock(operator: String) {
-        _blocks.add(Block.ConditionBlock(UUID.randomUUID().toString(), operator = operator))
+    fun addConditionBlock(operator: String, leftExpr: IPlacable? = null, rightExpr: IPlacable? = null) {
+        _blocks.add(Block.ConditionBlock(UUID.randomUUID().toString(),
+            operator = operator, leftExpr = leftExpr, rightExpr = rightExpr))
     }
 
-    fun addPrintBlock() {
-        _blocks.add(Block.PrintBlock(UUID.randomUUID().toString()))
+    fun addPrintBlock(variable: Variable? = null) {
+        _blocks.add(Block.PrintBlock(UUID.randomUUID().toString(), variable = variable))
     }
 
-    fun addWhileBlock(operator:String) {
-        _blocks.add(Block.WhileBlock(UUID.randomUUID().toString(), operator = operator))
+    fun addWhileBlock(operator:String, leftExpr: IPlacable?=null, rightExpr: IPlacable? = null) {
+        _blocks.add(Block.WhileBlock(UUID.randomUUID().toString(),
+            operator = operator, leftExpr = leftExpr, rightExpr = rightExpr))
     }
 
     fun addCreatingArrayBlock(arrName: String, arrSize: String) {
@@ -137,13 +149,73 @@ class MainViewModel : ViewModel() {
     }
 
     fun addEndifBlock() {
-        if(!isIfClosed) {
-            _blocks.add(Block.EndifBlock(UUID.randomUUID().toString()))
-            _isIfClosed.value = true
+        blocks.reversed().forEach { block ->
+            if(block is Block.EndifBlock)
+                return
+
+            if(block is Block.ElseBlock || block is Block.ConditionBlock) {
+                _blocks.add(Block.EndifBlock(UUID.randomUUID().toString()))
+                return
+            }
+
+        }
+    }
+
+    fun addEndwhileBlock() {
+        blocks.reversed().forEach { block ->
+            if(block is Block.EndWhile)
+                return
+
+            if( block is Block.WhileBlock)
+                _blocks.add(Block.EndWhile(UUID.randomUUID().toString()))
+        }
+    }
+
+    fun addElseBlock() {
+        blocks.reversed().forEach { block ->
+            if(block is Block.ElseBlock || block is Block.EndifBlock)
+                return
+
+            if( block is Block.ConditionBlock)
+                _blocks.add(Block.ElseBlock(UUID.randomUUID().toString()))
+
         }
     }
 
     fun onItemSelected(item: String?) {
         selectedItem.value = item
+    }
+
+    fun loadBlocks(commands: List<String>)
+    {
+        val regex = Regex("""^[a-zA-Z_][a-zA-Z0-9_]*$""")
+        commands.forEach { command ->
+            var splited = command.split(" ")
+            when(splited[0]) {
+                "var" -> addVariable(splited[1])
+                "endif" -> addEndifBlock()
+                "assign" -> if(command.contains("["))
+                    addAssignArrayBlock(splited[1].split("[")[0],
+                        splited[1].split("[")[1].split("]")[1], Value(splited[2]))
+                    else addAssignmentBlock(Variable(splited[1],""),
+                        if(regex.matches(splited[2])) Variable(splited[2],"") else
+                    Value(splited[2]))
+                "if" -> addConditionBlock(splited[2],
+                    if(regex.matches(splited[1])) Variable(splited[1],"")
+                    else Value(splited[1]),
+                    if(regex.matches(splited[3])) Variable(splited[3],"")
+                    else Value(splited[3])
+                )
+                "while" -> addWhileBlock(
+                    splited[2],
+                    if(regex.matches(splited[1])) Variable(splited[1],"")
+                    else Value(splited[1]),
+                    if(regex.matches(splited[3])) Variable(splited[3],"")
+                    else Value(splited[3])
+                )
+                "print" -> addPrintBlock(Variable(splited[1],""))
+                "array" -> addCreatingArrayBlock(splited[1], splited[2])
+            }
+        }
     }
 }

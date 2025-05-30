@@ -84,7 +84,7 @@ fun AssignArrBlock(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                val text = if(block.arr != null) block.arr?.name else "Arr"
+                val text = if(block.arrName != null) block.arrName else "Arr"
                 Text(text = text.toString(), color = Color.LightGray, fontSize = 11.sp)
             }
 
@@ -196,7 +196,7 @@ fun AssignArrBlock(
                 },
                 dismissButton = {
                     Button(onClick = {
-                        block.arr = null
+                        block.arrName = null
                         showDialog = false },
                         modifier = Modifier.border(width = 1.dp, color = Color.White, shape = RoundedCornerShape(40.dp)),
                         colors = ButtonDefaults.buttonColors(

@@ -103,6 +103,8 @@ fun WorkArea(blocks: List<Block>, viewModel: MainViewModel) {
                         is Block.CreatingArrayBlock -> CreateArrayBlock(block)
                         is Block.AssignArrBlock -> AssignArrBlock(block, viewModel)
                         is Block.WhileBlock -> WhileBlock(block, viewModel)
+                        is Block.ElseBlock -> ElseBlock()
+                        is Block.EndWhile -> EndWhile()
                     }
                 }
 

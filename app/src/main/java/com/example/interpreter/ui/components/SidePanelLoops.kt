@@ -51,7 +51,10 @@ fun SidePanelLoops(viewModel: MainViewModel) {
                 backgroundAlpha.animateTo(0f, tween(300))
             }
             launch {
-                slideAnim.animateTo(-panelWidthPx, animationSpec = tween(300, easing = FastOutSlowInEasing))
+                slideAnim.animateTo(
+                    -panelWidthPx,
+                    animationSpec = tween(300, easing = FastOutSlowInEasing)
+                )
             }
         }
     }
@@ -112,8 +115,43 @@ fun SidePanelLoops(viewModel: MainViewModel) {
                     )
                 }
             }
+            Button(
+                onClick =
+                    {
+                        viewModel.addEndwhileBlock()
+                    },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp, 25.dp, 10.dp, 0.dp)
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(
+                                Color(59, 160, 255),
+                                Color(121, 59, 255)
+                            )
+                        ),
+                        shape = RoundedCornerShape(40.dp)
+                    ),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(40.dp),
+                contentPadding = PaddingValues()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Endwhile",
+                        fontFamily = FontFamily(Font(R.font.lato, FontWeight.Bold))
+                    )
+                }
 
-
+            }
         }
     }
 }

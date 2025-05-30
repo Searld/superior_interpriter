@@ -50,12 +50,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.interpreter.R
+import com.example.interpreter.model.Block
+import com.example.interpreter.model.MapperForSerialization
+import com.example.interpreter.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
 import java.nio.file.WatchEvent
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(viewModel: MainViewModel) {
     val imageOffsetX = remember { Animatable(-100f) }
     val alpha = remember { Animatable(0f) }
     var context = LocalContext.current
@@ -140,8 +144,13 @@ fun SettingsScreen() {
 
                 Button(
                     onClick = {
-                        Configs.export(context, listOf("array a", "assign a 5"), nameForSave)
-
+                        val listOfCommands = viewModel.blocks.mapNotNull { block ->
+                            if(block is Block.PrintBlock)
+                                "print ${block.variable?.name}"
+                            else
+                                block.command()
+                        }
+                        Configs.export(context,listOfCommands,nameForSave)
                     },
                     modifier = Modifier
                         .weight(1f)
@@ -184,9 +193,9 @@ fun SettingsScreen() {
                 var nameForLoad by remember { mutableStateOf("") }
                 var expanded by remember { mutableStateOf(false) }
                 var algorithms = remember { mutableStateListOf<String>() }
-
+                var selectedAlgo by remember { mutableStateOf("") }
                 BasicTextField(
-                    value = "Select algo",
+                    value = if(!selectedAlgo.isEmpty()) selectedAlgo else "Select algo",
                     readOnly = true,
                     onValueChange = { nameForLoad = it },
                     singleLine = true,
@@ -209,6 +218,7 @@ fun SettingsScreen() {
                                 .fillMaxSize()
                                 .padding(horizontal = 8.dp)
                                 .clickable{
+
                                     algorithms.addAll(Configs.getSavedFileNames(context))
                                     expanded = true
                                 },
@@ -229,6 +239,7 @@ fun SettingsScreen() {
                         DropdownMenuItem(
                             text = { Text(text = algo, color = Color.White) },
                             onClick = {
+                                selectedAlgo = algo
                                 expanded = false
                             }
                         )
@@ -236,6 +247,7 @@ fun SettingsScreen() {
                 }
                 Button(
                     onClick = {
+                        viewModel.loadBlocks(Configs.import(context, selectedAlgo ))
                     },
                     modifier = Modifier
                         .weight(1f)
