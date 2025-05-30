@@ -1,10 +1,13 @@
 package com.example.interpreter.viewmodel
 
+import Utils.Exceptions
+import android.R.bool
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.interpreter.model.Array
 import com.example.interpreter.model.Block
 import com.example.interpreter.model.IPlacable
 import com.example.interpreter.model.SelectedSlot
@@ -25,6 +28,9 @@ class MainViewModel : ViewModel() {
     private val _variables = mutableStateListOf<Variable>()
     val variables: List<Variable> get() = _variables
 
+    private val _arrays = mutableStateListOf<Array>()
+    val arrays: List<Array> get() = _arrays
+
     var selectedItem = mutableStateOf<String?>(null)
         private set
 
@@ -35,16 +41,18 @@ class MainViewModel : ViewModel() {
         _selectedSlot.value = SelectedSlot(blockId, slot)
     }
 
+    private val _isIfClosed = mutableStateOf(false)
+    val isIfClosed: Boolean get() = _isIfClosed.value
+
     private val _output = mutableStateOf<RunResult?>(null)
     val output: RunResult? get() = _output.value
 
-    fun executeSource(lines: List<String>) = viewModelScope.launch {
+    fun executeSource(lines: List<String>, onError: (String) -> Unit) = viewModelScope.launch {
         try {
             val program = BytecodeGenerator.parse(lines)
             _output.value = BytecodeRunner.run(program)
-
         } catch (e: Exception) {
-            _output.value = null
+            onError(e.message ?: "Unknown error")
         }
     }
 
@@ -54,23 +62,42 @@ class MainViewModel : ViewModel() {
         if (index == -1) return
 
         val oldBlock = _blocks[index]
-        val newBlock = when (oldBlock){
-            is Block.AssignmentBlock -> when(slot.slot){
-                "left" -> oldBlock.copy(left = value)
-                "right" -> oldBlock.copy(right = value)
+        try {
+             val newBlock = when (oldBlock){
+                is Block.AssignmentBlock -> when(slot.slot){
+                    "left" -> oldBlock.copy(left = value)
+                    "right" -> oldBlock.copy(right = value)
+                    else -> oldBlock
+                }
+                is Block.ConditionBlock -> when(slot.slot){
+                    "left" -> oldBlock.copy(leftExpr = value)
+                    "right" -> oldBlock.copy(rightExpr = value)
+                    else -> oldBlock
+                }
+                is Block.AssignArrBlock -> when(slot.slot){
+                    "left" -> oldBlock.copy(arr = value as Array)
+                    "right" -> oldBlock.copy(value = value as Value)
+                    else -> oldBlock
+                }
+                is Block.PrintBlock -> oldBlock.copy(variable = value as Variable)
                 else -> oldBlock
             }
-            is Block.ConditionBlock -> when(slot.slot){
-                "left" -> oldBlock.copy(leftExpr = value)
-                "right" -> oldBlock.copy(rightExpr = value)
-                else -> oldBlock
-            }
-            is Block.PrintBlock -> oldBlock.copy(variable = value as Variable)
-            else -> oldBlock
+            _blocks[index] = newBlock
+            clearSelectedSlot()
         }
+        catch (e: Exception)
+        {
+            Exceptions.handleException("Invalid type for insert")
+        }
+    }
 
-        _blocks[index] = newBlock
-        clearSelectedSlot()
+    fun removeBlock(blockId: String) {
+        var block = _blocks.find{it.id == blockId}
+        if(block is Block.CreatingArrayBlock)
+            _arrays.removeAll { it.name == block.name }
+        if(block is Block.VariableBlock)
+            _variables.removeAll { it.name == block.variable.name }
+        _blocks.removeAll { it.id == blockId }
     }
 
     fun clearSelectedSlot() {
@@ -87,6 +114,10 @@ class MainViewModel : ViewModel() {
         _blocks.add(Block.AssignmentBlock(UUID.randomUUID().toString()))
     }
 
+    fun addAssignArrayBlock() {
+        _blocks.add(Block.AssignArrBlock(UUID.randomUUID().toString()))
+    }
+
     fun addConditionBlock() {
         _blocks.add(Block.ConditionBlock(UUID.randomUUID().toString()))
     }
@@ -95,8 +126,17 @@ class MainViewModel : ViewModel() {
         _blocks.add(Block.PrintBlock(UUID.randomUUID().toString()))
     }
 
+    fun addCreatingArrayBlock(arrName: String, arrSize: String) {
+        val arr = Array(arrName, arrSize)
+        _arrays.add(arr)
+        _blocks.add(Block.CreatingArrayBlock(UUID.randomUUID().toString(), arrName, arrSize))
+    }
+
     fun addEndifBlock() {
-        _blocks.add(Block.EndifBlock(UUID.randomUUID().toString()))
+        if(!isIfClosed) {
+            _blocks.add(Block.EndifBlock(UUID.randomUUID().toString()))
+            _isIfClosed.value = true
+        }
     }
 
     fun onItemSelected(item: String?) {

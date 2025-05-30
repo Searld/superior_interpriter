@@ -1,5 +1,7 @@
 package com.example.interpreter.model
 
+import Utils.Exceptions
+
 sealed class Block(open val id: String) {
     abstract fun command(): String
 
@@ -8,7 +10,14 @@ sealed class Block(open val id: String) {
         val variable: Variable
     ) : Block(id) {
         override fun command(): String {
-            return "var ${variable.name}"
+            try {
+                return "var ${variable.name}"
+            }
+            catch (e: Exception)
+            {
+                Exceptions.handleException("Var name was null")
+                return ""
+            }
         }
     }
 
@@ -26,8 +35,15 @@ sealed class Block(open val id: String) {
         var right: IPlacable? = null
     ) : Block(id) {
         override fun command(): String {
-            var rightCommand = if(right is Variable) (right as Variable).name else (right as Value).value
-            return "assign ${(left as Variable).name} $rightCommand"
+            try{
+                var rightCommand = if(right is Variable) (right as Variable).name else (right as Value).value
+                return "assign ${(left as Variable).name} $rightCommand"
+            }
+            catch (e: Exception)
+            {
+                Exceptions.handleException("Null assignment")
+                return ""
+            }
         }
     }
     data class ConditionBlock(
@@ -36,9 +52,17 @@ sealed class Block(open val id: String) {
         var rightExpr: IPlacable? = null
     ) : Block(id) {
         override fun command(): String {
-            var rightCommand = if(rightExpr is Variable) (rightExpr as Variable).name else (rightExpr as Value).value
-            var leftCommand = if(leftExpr is Variable) (leftExpr as Variable).name else (leftExpr as Value).value
-            return "if $leftCommand > $rightCommand"
+            try {
+                var rightCommand = if(rightExpr is Variable) (rightExpr as Variable).name else (rightExpr as Value).value
+                var leftCommand = if(leftExpr is Variable) (leftExpr as Variable).name else (leftExpr as Value).value
+                return "if $leftCommand > $rightCommand"
+            }
+            catch (e: Exception)
+            {
+                Exceptions.handleException("One of expression was null")
+                return ""
+            }
+
         }
     }
     data class PrintBlock(
@@ -47,6 +71,25 @@ sealed class Block(open val id: String) {
     ) : Block(id) {
         override fun command(): String {
             return ""
+        }
+    }
+    data class CreatingArrayBlock(
+        override val id: String,
+        var name: String,
+        var size: String
+    ) : Block(id) {
+        override fun command(): String {
+            return "array $name $size"
+        }
+    }
+    data class AssignArrBlock(
+        override val id: String,
+        var arr: Array? = null,
+        var index: String = "0",
+        var value: Value? = null
+    ) : Block(id) {
+        override fun command(): String {
+            return "assign ${arr?.name}[$index] $value"
         }
     }
 }

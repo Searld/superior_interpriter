@@ -3,6 +3,7 @@ package com.example.interpreter.components
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,6 +25,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.window.DialogProperties
 import com.example.interpreter.viewmodel.MainViewModel
 
 @Composable
@@ -35,7 +37,8 @@ fun SidePanelVariables(viewModel: MainViewModel) {
     val slideAnim = remember { Animatable(-panelWidthPx) }
     val backgroundAlpha = remember { Animatable(0f) }
 
-    var showDialog by remember { mutableStateOf(false) }
+    var showArrayDialog by remember { mutableStateOf(false) }
+    var showVarDialog by remember { mutableStateOf(false) }
     LaunchedEffect(viewModel.selectedItem.value) {
         if (viewModel.selectedItem.value == "Variables") {
             launch {
@@ -75,9 +78,75 @@ fun SidePanelVariables(viewModel: MainViewModel) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Button(
-                onClick = { showDialog = true },
+                onClick = { showVarDialog = true },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(10.dp, 15.dp, 10.dp, 0.dp)
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(
+                                Color(59, 160, 255),
+                                Color(121, 59, 255)
+                            )
+                        ),
+                        shape = RoundedCornerShape(40.dp)
+                    ),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(40.dp),
+                contentPadding = PaddingValues()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Variable",
+                        fontFamily = FontFamily(Font(R.font.lato, FontWeight.Bold))
+                    )
+                }
+            }
+            Button(
+                onClick = { showArrayDialog = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp, 15.dp, 10.dp, 0.dp)
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(
+                                Color(59, 160, 255),
+                                Color(121, 59, 255)
+                            )
+                        ),
+                        shape = RoundedCornerShape(40.dp)
+                    ),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(40.dp),
+                contentPadding = PaddingValues()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Array",
+                        fontFamily = FontFamily(Font(R.font.lato, FontWeight.Bold))
+                    )
+                }
+            }
+
+            Button(
+                onClick = { viewModel.addAssignArrayBlock()},
+                modifier = Modifier.fillMaxWidth()
                     .padding(10.dp, 25.dp, 10.dp, 0.dp)
                     .background(
                         brush = Brush.horizontalGradient(
@@ -102,12 +171,11 @@ fun SidePanelVariables(viewModel: MainViewModel) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "Create variable",
+                        "Assign array",
                         fontFamily = FontFamily(Font(R.font.lato, FontWeight.Bold))
                     )
                 }
             }
-
             Button(
                 onClick = { viewModel.addAssignmentBlock()},
                 modifier = Modifier.fillMaxWidth()
@@ -141,11 +209,11 @@ fun SidePanelVariables(viewModel: MainViewModel) {
                 }
             }
             Text(
-                "Variables:",
+                "Variables and arrays:",
                 fontFamily = FontFamily(Font(R.font.lato, FontWeight.Bold)),
                 fontSize = 26.sp,
                 color = Color.LightGray,
-                modifier = Modifier.padding(10.dp, 20.dp, 10.dp, 0.dp)
+                modifier = Modifier.padding(10.dp, 30.dp, 10.dp, 0.dp)
             )
 
             viewModel.variables.forEach { variable ->
@@ -169,38 +237,112 @@ fun SidePanelVariables(viewModel: MainViewModel) {
                     )
                 }
             }
-
+            viewModel.arrays.forEach { arr ->
+                val name = arr.name
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .padding(10.dp,20.dp,10.dp,0.dp)
+                        .border(width = 1.dp, color = Color.White, shape = RoundedCornerShape(8.dp))
+                        .background(Color.Transparent)
+                        .clickable {
+                            viewModel.insertIntoSelectedSlot(arr)
+                            viewModel.onItemSelected(null)},
+                    contentAlignment = Alignment.Center
+                )
+                {
+                    Text(
+                        "$name[]",
+                        color = Color.White,
+                        fontSize = 11.sp
+                    )
+                }
+            }
+            if(showVarDialog)
+                CreatingDialog("Create variable","Enter name:",
+                    {showVarDialog = false}, viewModel,"Var")
+            if(showArrayDialog)
+                CreatingDialog("Create array","Enter name:",
+                    {showArrayDialog = false}, viewModel, "Array")
         }
     }
-    if (showDialog) {
-        var variableName by remember { mutableStateOf("") }
+}
+@Composable
+fun CreatingDialog(title: String, desc: String,
+                   onClose: () -> Unit,
+                   viewModel: MainViewModel,
+                   type: String)
+{
+
+        var name by remember { mutableStateOf("") }
 
         AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text("New Variable") },
+            modifier = Modifier.border(
+                BorderStroke(1.dp, Color.White.copy(alpha = 0.4f)),
+                shape = RoundedCornerShape(25.dp)
+            ),
+            containerColor =Color(5, 5, 5).copy(alpha = 0.95f),
+            properties = DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true
+            ),
+            onDismissRequest = { onClose() },
+            title = { Text(text = title, color = Color.White) },
             text = {
                 Column {
-                    Text("Enter variable name:")
+                    Text(text = desc, color = Color.White)
                     TextField(
-                        value = variableName,
-                        onValueChange = { variableName = it },
-                        singleLine = true
+                        value = name,
+                        onValueChange = { name = it },
+                        singleLine = true,
+                        modifier = Modifier.padding(0.dp,10.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.White.copy(alpha = 0.09f),
+                            unfocusedContainerColor = Color.White.copy(alpha = 0.09f),
+                            focusedIndicatorColor = Color.White,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White
+                        )
                     )
                 }
             },
             confirmButton = {
                 Button(onClick = {
-                    viewModel.addVariable(variableName)
-                    showDialog = false
-                }) {
+                    if(type == "Array")
+                        viewModel.addCreatingArrayBlock(name, "0")
+                    else
+                        viewModel.addVariable(name)
+
+                    onClose()
+                },
+                    modifier = Modifier.background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(
+                                Color(59, 160, 255),
+                                Color(121, 59, 255)
+                            )
+                        ),
+                        shape = RoundedCornerShape(40.dp)
+                    ),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = Color.White
+                    )) {
                     Text("Create")
                 }
             },
             dismissButton = {
-                Button(onClick = { showDialog = false }) {
+                Button(onClick = {onClose() },
+                    modifier = Modifier.border(width = 1.dp, color = Color.White, shape = RoundedCornerShape(40.dp)),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = Color.White
+                    )) {
                     Text("Cancel")
                 }
             }
         )
-    }
+
 }

@@ -41,6 +41,7 @@ fun BottomMenu(navController: NavHostController) {
                             is Screen.Main -> Icons.Default.Home
                             is Screen.Run -> Icons.Default.Star
                             is Screen.Settings -> Icons.Default.Settings
+                            else -> Icons.Default.Home
                         },
                         contentDescription = screen.label
                     )

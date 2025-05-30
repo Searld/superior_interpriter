@@ -1,5 +1,3 @@
-package com.example.interpreter.ui.components
-
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,11 +5,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -27,20 +28,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.example.interpreter.model.Block
-import com.example.interpreter.R
 import com.example.interpreter.model.Value
 import com.example.interpreter.model.Variable
 import com.example.interpreter.viewmodel.MainViewModel
 
 @Composable
-fun ConditionBlock(
-    block: Block.ConditionBlock,
+fun AssignArrBlock(
+    block: Block.AssignArrBlock,
     viewModel: MainViewModel
 ) {
     val selectedSlot = viewModel.selectedSlot
@@ -48,6 +48,8 @@ fun ConditionBlock(
     val isRightSelected = selectedSlot?.blockId == block.id && selectedSlot.slot == "right"
     val value = remember{mutableStateOf("")}
     var showDialog by remember { mutableStateOf(false) }
+    var index by remember { mutableStateOf("") }
+    block.index = index
 
     Box(
         modifier = Modifier
@@ -65,16 +67,11 @@ fun ConditionBlock(
         contentAlignment = Alignment.Center
     )  {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-
-            Text("If", color = Color.White, fontSize = 20.sp,
-                modifier = Modifier.padding(10.dp,0.dp),
-                fontFamily = FontFamily(Font(R.font.lato)))
-
             Box(
                 modifier = Modifier
-                    .weight(0.7f)
+                    .weight(1f)
                     .height(30.dp)
-                    .padding(end = 10.dp)
+                    .padding(10.dp, 0.dp)
                     .border(
                         width = 1.dp,
                         color = if (isLeftSelected) Color.Red.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.1f),
@@ -83,27 +80,43 @@ fun ConditionBlock(
                     .background(Color(70, 106, 140).copy(alpha = 0.09f), shape = RoundedCornerShape(8.dp))
                     .clickable {
                         if (isLeftSelected) viewModel.clearSelectedSlot()
-                        else {
-                            viewModel.selectSlot(block.id, "left")
-                            showDialog = true
-                        }
+                        else viewModel.selectSlot(block.id, "left")
                     },
                 contentAlignment = Alignment.Center
             ) {
-                val text = when (val left = block.leftExpr) {
-                    is Variable -> left.name
-                    is Value -> left.value
-                    else -> "Expression"
-                }
-                Text(text, color = Color.LightGray, fontSize = 11.sp)
+                val text = if(block.arr != null) block.arr?.name else "Arr"
+                Text(text = text.toString(), color = Color.LightGray, fontSize = 11.sp)
             }
 
-            Text(">", color = Color.White, fontSize = 25.sp)
-
-
+            Text("[", color = Color.White, fontSize = 19.sp)
+            BasicTextField(
+                value = index,
+                onValueChange = { index = it },
+                singleLine = true,
+                textStyle = TextStyle(
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center
+                ),
+                modifier = Modifier
+                    .width(30.dp)
+                    .height(25.dp)
+                    .border(1.dp, Color.White, RoundedCornerShape(10.dp))
+                    .background(Color(70, 106, 140).copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+                    .padding(0.dp),
+                decorationBox = { innerTextField ->
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        innerTextField()
+                    }
+                }
+            )
+            Text("]", color = Color.White, fontSize = 19.sp)
             Box(
                 modifier = Modifier
-                    .weight(0.8f)
+                    .weight(1f)
                     .height(30.dp)
                     .padding(10.dp, 0.dp)
                     .border(
@@ -122,13 +135,10 @@ fun ConditionBlock(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                val text = when (val right = block.rightExpr) {
-                    is Variable -> right.name
-                    is Value -> right.value
-                    else -> "Expression"
-                }
-                Text(text, color = Color.LightGray, fontSize = 11.sp)
+                val text = if(block.value != null) block?.value?.value.toString() else "Value"
+                Text(text = text, color = Color.LightGray, fontSize = 11.sp)
             }
+
         }
         if(showDialog)
         {
@@ -186,8 +196,7 @@ fun ConditionBlock(
                 },
                 dismissButton = {
                     Button(onClick = {
-                        if(isRightSelected) block.rightExpr = null
-                        if(isLeftSelected) block.leftExpr = null
+                        block.arr = null
                         showDialog = false },
                         modifier = Modifier.border(width = 1.dp, color = Color.White, shape = RoundedCornerShape(40.dp)),
                         colors = ButtonDefaults.buttonColors(
