@@ -49,13 +49,14 @@ sealed class Block(open val id: String) {
     data class ConditionBlock(
         override val id: String,
         var leftExpr: IPlacable? = null,
-        var rightExpr: IPlacable? = null
+        var rightExpr: IPlacable? = null,
+        var operator: String
     ) : Block(id) {
         override fun command(): String {
             try {
                 var rightCommand = if(rightExpr is Variable) (rightExpr as Variable).name else (rightExpr as Value).value
                 var leftCommand = if(leftExpr is Variable) (leftExpr as Variable).name else (leftExpr as Value).value
-                return "if $leftCommand > $rightCommand"
+                return "if $leftCommand $operator $rightCommand"
             }
             catch (e: Exception)
             {
@@ -65,6 +66,28 @@ sealed class Block(open val id: String) {
 
         }
     }
+
+    data class WhileBlock(
+        override val id: String,
+        var leftExpr: IPlacable? = null,
+        var rightExpr: IPlacable? = null,
+        var operator: String
+    ) : Block(id) {
+        override fun command(): String {
+            try {
+                var rightCommand = if(rightExpr is Variable) (rightExpr as Variable).name else (rightExpr as Value).value
+                var leftCommand = if(leftExpr is Variable) (leftExpr as Variable).name else (leftExpr as Value).value
+                return "while $leftCommand $operator $rightCommand"
+            }
+            catch (e: Exception)
+            {
+                Exceptions.handleException("One of expression was null")
+                return ""
+            }
+
+        }
+    }
+
     data class PrintBlock(
         override val id: String,
         var variable: Variable? = null

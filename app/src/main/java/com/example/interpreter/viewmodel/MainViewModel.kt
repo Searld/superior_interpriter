@@ -118,12 +118,16 @@ class MainViewModel : ViewModel() {
         _blocks.add(Block.AssignArrBlock(UUID.randomUUID().toString()))
     }
 
-    fun addConditionBlock() {
-        _blocks.add(Block.ConditionBlock(UUID.randomUUID().toString()))
+    fun addConditionBlock(operator: String) {
+        _blocks.add(Block.ConditionBlock(UUID.randomUUID().toString(), operator = operator))
     }
 
     fun addPrintBlock() {
         _blocks.add(Block.PrintBlock(UUID.randomUUID().toString()))
+    }
+
+    fun addWhileBlock(operator:String) {
+        _blocks.add(Block.WhileBlock(UUID.randomUUID().toString(), operator = operator))
     }
 
     fun addCreatingArrayBlock(arrName: String, arrSize: String) {

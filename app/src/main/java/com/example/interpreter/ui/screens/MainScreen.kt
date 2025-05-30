@@ -15,6 +15,7 @@ import com.example.interpreter.components.BottomMenu
 import com.example.interpreter.components.SidePanelVariables
 import com.example.interpreter.components.SidePanelConditions
 import com.example.interpreter.components.SidePanelFunctions
+import com.example.interpreter.components.SidePanelLoops
 import com.example.interpreter.components.WorkArea
 import com.example.interpreter.ui.components.*
 import com.example.interpreter.viewmodel.MainViewModel
@@ -40,5 +41,6 @@ fun MainScreen(viewModel: MainViewModel) {
         SidePanelVariables(viewModel)
         SidePanelConditions(viewModel)
         SidePanelFunctions(viewModel)
+        SidePanelLoops(viewModel)
     }
 }

@@ -29,7 +29,7 @@ import com.example.interpreter.model.Variable
 import com.example.interpreter.viewmodel.MainViewModel
 
 @Composable
-fun SidePanelConditions(viewModel: MainViewModel) {
+fun SidePanelLoops(viewModel: MainViewModel) {
     val panelWidthDp = 300.dp
     val density = LocalDensity.current
     val panelWidthPx = with(density) { panelWidthDp.toPx() }
@@ -39,7 +39,7 @@ fun SidePanelConditions(viewModel: MainViewModel) {
 
     var showDialog by remember { mutableStateOf(false) }
     LaunchedEffect(viewModel.selectedItem.value) {
-        if (viewModel.selectedItem.value == "Conditions") {
+        if (viewModel.selectedItem.value == "Loops") {
             launch {
                 slideAnim.animateTo(0f, animationSpec = tween(350, easing = FastOutSlowInEasing))
             }
@@ -79,7 +79,7 @@ fun SidePanelConditions(viewModel: MainViewModel) {
             Button(
                 onClick =
                     {
-                        viewModel.addConditionBlock(">")
+                        viewModel.addWhileBlock(">")
                     },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -107,77 +107,13 @@ fun SidePanelConditions(viewModel: MainViewModel) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "If",
+                        "While",
                         fontFamily = FontFamily(Font(R.font.lato, FontWeight.Bold))
                     )
                 }
             }
 
-            Button(
-                onClick = { viewModel.addAssignmentBlock()},
-                modifier = Modifier.fillMaxWidth()
-                    .padding(10.dp, 15.dp, 10.dp, 0.dp)
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                Color(59, 160, 255),
-                                Color(121, 59, 255)
-                            )
-                        ),
-                        shape = RoundedCornerShape(40.dp)
-                    ),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = Color.White
-                ),
-                shape = RoundedCornerShape(40.dp),
-                contentPadding = PaddingValues()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "Else",
-                        fontFamily = FontFamily(Font(R.font.lato, FontWeight.Bold))
-                    )
-                }
-            }
 
-            Button(
-                onClick = { viewModel.addEndifBlock()},
-                modifier = Modifier.fillMaxWidth()
-                    .padding(10.dp, 15.dp, 10.dp, 0.dp)
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                Color(59, 160, 255),
-                                Color(121, 59, 255)
-                            )
-                        ),
-                        shape = RoundedCornerShape(40.dp)
-                    ),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = Color.White
-                ),
-                shape = RoundedCornerShape(40.dp),
-                contentPadding = PaddingValues()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "Endif",
-                        fontFamily = FontFamily(Font(R.font.lato, FontWeight.Bold))
-                    )
-                }
-            }
         }
     }
 }

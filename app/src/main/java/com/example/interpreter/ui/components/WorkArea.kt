@@ -35,6 +35,7 @@ import com.example.interpreter.model.Block
 import com.example.interpreter.model.Value
 import com.example.interpreter.ui.components.ConditionBlock
 import com.example.interpreter.ui.components.PrintBlock
+import com.example.interpreter.ui.components.WhileBlock
 import com.example.interpreter.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -101,6 +102,7 @@ fun WorkArea(blocks: List<Block>, viewModel: MainViewModel) {
                         is Block.PrintBlock -> PrintBlock(viewModel, block)
                         is Block.CreatingArrayBlock -> CreateArrayBlock(block)
                         is Block.AssignArrBlock -> AssignArrBlock(block, viewModel)
+                        is Block.WhileBlock -> WhileBlock(block, viewModel)
                     }
                 }
 

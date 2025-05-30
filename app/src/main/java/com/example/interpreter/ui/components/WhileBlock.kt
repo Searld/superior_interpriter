@@ -7,7 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -43,8 +42,8 @@ import com.example.interpreter.model.Variable
 import com.example.interpreter.viewmodel.MainViewModel
 
 @Composable
-fun ConditionBlock(
-    block: Block.ConditionBlock,
+fun WhileBlock(
+    block: Block.WhileBlock,
     viewModel: MainViewModel
 ) {
     val selectedSlot = viewModel.selectedSlot
@@ -74,7 +73,7 @@ fun ConditionBlock(
     )  {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
 
-            Text("If", color = Color.White, fontSize = 20.sp,
+            Text("While", color = Color.White, fontSize = 20.sp,
                 modifier = Modifier.padding(10.dp,0.dp),
                 fontFamily = FontFamily(Font(R.font.lato)))
 
@@ -105,7 +104,6 @@ fun ConditionBlock(
                 }
                 Text(text, color = Color.LightGray, fontSize = 11.sp)
             }
-
             Box {
                 Text(
                     text = selected,
@@ -123,18 +121,19 @@ fun ConditionBlock(
                         .background(Color(15, 24, 36))
                         .width(50.dp)
                 ) {
-                        options.forEach { operator ->
-                            DropdownMenuItem(
-                                text = { Text(operator, color = Color.White) },
-                                onClick = {
-                                    selected = operator
-                                    expanded = false
-                                }
-                            )
-                        }
-
+                    options.forEach { operator ->
+                        DropdownMenuItem(
+                            text = { Text(operator, color = Color.White) },
+                            onClick = {
+                                selected = operator
+                                expanded = false
+                            }
+                        )
                     }
+
                 }
+            }
+
 
             Box(
                 modifier = Modifier
